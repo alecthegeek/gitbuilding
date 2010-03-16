@@ -1,0 +1,45 @@
+#! /bin/sh
+
+REPO=file:///home/alec/Voga/laptop/gigs/OSDC/repo ; export REPO
+
+MODULE=main ; export MODULE
+
+BUILDCONFIG="$(cat /etc/SuSE-release | head -1 ) $(cc --version|head -1 ) $(rpm -q glibc)" ; export BUILDCONFIG
+BUILDHOST=$(hostname --fqdn) ; export BUILDHOST
+
+BUILDNO=$(printf "%.8d" $(echo $(cat Build_no ) + 1 | bc)) ; export BUILDNO
+
+echo $BUILDNO > Build_no
+
+BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
+
+BUILDLOG=$BUILDPROJECT/$BUILDNO/makefile.log ; export BUILDLOG
+
+svn mkdir $REPO/build/$BUILDPROJECT/  --message "Set up build area"
+
+echo About to build module $MODULE in Build Project $BUILDPROJECT \(Build Number $BUILDNO\)
+echo Build platform is $BUILDCONFIG
+
+svn cp $REPO/trunk/$MODULE  $REPO/build/$BUILDPROJECT/$BUILDNO  --message "System Build $BUILDPROJECT $BUILDNO"
+
+# Get the source code for the built`
+svn co $REPO/build/$BUILDPROJECT/$BUILDNO ./$BUILDPROJECT/$BUILDNO
+
+# Set Config Management to highest level
+_CM_LEVEL=SYSTEM ; export _CM_LEVEL
+
+
+if make -f makefile -C $BUILDPROJECT/$BUILDNO > $BUILDLOG 2>&1  ; then
+
+	# Save the log file
+	svn add $BUILDLOG $REPO/build/$BUILDLOG
+
+	# Commit the build outputs
+	svn ci $BUILDPROJECT/$BUILDNO --message "System Build $BUILDPROJECT $BUILDNO" 
+	echo Build $BUILDNO completed -- CM Changes commited
+
+else
+	# The build failed so revert any changes
+	svn revert
+	echo Build $BUILDNO failed -- CM Changes not commited
+fi

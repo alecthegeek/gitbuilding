@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Building With a Version Control Audit Trail</title>
+</head>
+<body>
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">Date<br>
+      </td>
+      <td style="vertical-align: top;">Version<br>
+      </td>
+      <td style="vertical-align: top;">Author<br>
+      </td>
+      <td style="vertical-align: top;">Description<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">30/Nov/06<br>
+      </td>
+      <td style="vertical-align: top;">0.2<br>
+      </td>
+      <td style="vertical-align: top;">Alec Clews
+&lt;alec.clews@voga.com.au&gt;<br>
+      </td>
+      <td style="vertical-align: top;">Initial Draft (copied from
+http://alecclews.pbwiki.com/SubversionBuilding)<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<br>
+<br>
+<!--Creative Commons License--><a rel="license"
+ href="http://creativecommons.org/licenses/by-sa/2.5/"><img
+ alt="Creative Commons License" style="border-width: 0pt;"
+ src="http://creativecommons.org/images/public/somerights20.png"></a><br>
+This work is licensed under a <a rel="license"
+ href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons
+Attribution-ShareAlike 2.5 License</a><!--/Creative Commons License--><!-- <rdf:RDF xmlns="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <Work rdf:about="">
+        <license rdf:resource="http://creativecommons.org/licenses/by-sa/2.5/" />
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/Text" />
+    </Work>
+    <License rdf:about="http://creativecommons.org/licenses/by-sa/2.5/"><permits rdf:resource="http://web.resource.org/cc/Reproduction"/><permits rdf:resource="http://web.resource.org/cc/Distribution"/><requires rdf:resource="http://web.resource.org/cc/Notice"/><requires rdf:resource="http://web.resource.org/cc/Attribution"/><permits rdf:resource="http://web.resource.org/cc/DerivativeWorks"/><requires rdf:resource="http://web.resource.org/cc/ShareAlike"/></License></rdf:RDF> -->.
+<br>
+<br>
+Abstract<br>
+<br>
+This paper discusses the issues that sourouding the building of
+software in a controlled fashion. It presents key requirments and
+concepts, and shows how the Configuration management change loop can be
+completed by managing the build process from the Version Control
+system, in this example Subversion and GNU Make.<br>
+<br>
+<br>
+<br>
+<br>
+A process will be presented that:<br>
+<br>
+# Ensures that all inputs to the build process are identified using a
+tag<br>
+# Identifies all builds with the build environment in which the build
+took place<br>
+# Places the build outputs under configuration management<br>
+<br>
+In addition possible areas of future development will be discussed,
+including the re-use of already built artifacts to speed up build time.<br>
+<br>
+!!What is Software Building<br>
+<br>
+When building software we take some input files, usually source code
+but they could be anything, and create some output files. Note that
+this paper does not discuss building code that is installed in some
+external environment such as a database.<br>
+<br>
+In many organisations the build process is given far too little
+attention. Common mistakes include<br>
+<br>
+* Not knowing what version of the code was used to build a specific
+output file<br>
+* Not knowing what software tools and third party libraries where used
+to build software<br>
+** Developers frequently supply production binaries created on their
+desktop PC's<br>
+* Not recording the results of the build for historical traceability.
+This includes information such as:<br>
+** The specific options that where chosen for each tool used in the
+build<br>
+** The software versions used in the build process<br>
+<br>
+In my many years of advising customers on their software process I am
+constantly disappointed by how many fail to see the value of an
+adequate build process or are not prepared to apply the effort to
+implement and maintain one. The sad fact is that failure to address the
+build process can break the entire SDLC and result in huge costs as
+people run around trying to answer the question "what's different in
+production that made it break today?".<br>
+<br>
+With the use of automated testing tools and frameworks the value of a
+automated build process is increased even more.<br>
+<br>
+There are other sources that talk about the mechanics of the build
+environment and creation of build scripts. I would like to talk about
+the interface between the build system and the configuration management
+system.<br>
+<br>
+For the purposes of this discussion there are three distinct build
+processes&lt;br&gt;<br>
+<br>
+* Sandbox builds that occur in a developer sandbox. The products of
+this build of not used outside the sandbox and are of no CM interest,
+other than they should not pollute the system build products<br>
+<br>
+* Integration Builds or Smoke Tests -- to ensure that the software
+builds. It should be noted that unit tests are often invoked as part of
+this process<br>
+<br>
+* System builds. These builds are performed by automated processes and
+create builds for two purposes<br>
+<br>
+** Creating deployment artifacts -- Creates outputs that is deployed to
+environments for some level of testing or for production release. <br>
+<br>
+** Providing a record of the build process for production audit
+purposes (NB Many current build systems fail in this requirement)<br>
+<br>
+!!! The importance of the Build Record<br>
+<br>
+From a configuration management perspective two of the key requirements
+are Accounting and Audit. These are not just academic concerns. We must
+be able to:<br>
+<br>
+# List all the artifacts and versions that compose a specific version
+of our product<br>
+# Show which changes have been made to product version and that the
+work was carried our correctly.<br>
+<br>
+A full discussion of this is ouside the scope of this paper, however it
+is important that the build process does not break the audit trail of
+information between our released product and the changes that were
+developed in our various environments.<br>
+<br>
+In certain circumstances there may be legal ramifications if we are
+unable to supply this information.<br>
+<br>
+!! System Builds<br>
+Ideally all system builds will be done in separate build environment
+distinct from the various runtime environments. This build environment
+should be subject to CM Change Control, e.g. a
+[http://alecthegeek.wordpress.com/2006/10/27/what-is-a-lightweight-ticket-process/|Lightweight
+Ticket Process].<br>
+<br>
+A system build must be done against a tagged version of the input files
+(a baseline).<br>
+<br>
+When the build is complete then consider placing the outputs from the
+build process under CM control. In subversion this can be done as
+follows:<br>
+* Copy the input files onto a new 'build' branch.&amp;nbsp; Consider
+having a 'builds' top level directory in your repository<br>
+* Copy the source branch to the build branch -- this is our input
+baseline<br>
+* The build environment should used a predefined CONFIG_ID (set in an
+environment variable). This should relate to a change ticket<br>
+* Generate a BUILD ID -- It consists of the CONFIG_ID concatenated with
+the date&amp;nbsp;YYYYMMDDHHMMSS<br>
+* As part of building each output perform an &lt;code&gt; svn add
+&amp;lt;outputfile&amp;gt; &lt;/code&gt;, on the build branch
+#&amp;nbsp; TODO -- test this<br>
+* At the end of the build perform a svn ci. This will add the new files
+built<br>
+* Apply two custom properties to each build file in Subversion
+a)The&amp;nbsp; CONFIG_ID and b) the BUILD_ID<br>
+* Close the build log<br>
+* Add and check in the build log to subversion on the Build branch and
+add the BUILD_ID property<br>
+<br>
+!Further Work<br>
+<br>
+* Using other Build tools (e.g. Ant, CONS...)<br>
+* Creating reports and release notes<br>
+* Using other Revision Control systems such as Hg<br>
+* <br>
+<br>
+!Issues<br>
+<br>
+* Building source languages such as Java<br>
+* Using tools other than Make (e.g. CONS, Ant)<br>
+* Scaling the project up to include more files across multiple
+direcotries and more file types (e.g. yacc grammar)<br>
+* Reusing built files across builds<br>
+* Building for different platforms<br>
+<br>
+!References<br>
+<br>
+* [http://www.cmcrossroads.com/content/view/6778/134/| Mr Make]<br>
+<br>
+*
+[hhttp://www.pcug.org.au/~millerp/rmch/recu-make-cons-harm.html|Recursive
+Make Considered Harmful]<br>
+<br>
+*
+[http://www.martinfowler.com/articles/continuousIntegration.html|Continuous
+Integration]<br>
+<br>
+*
+[http://subversion.open.collab.net/articles/IntegratingSubversionIntoYourAntBuild.html|Integrating
+Subversion Into Your Ant Build]<br>
+<br>
+<br>
+<br>
+<br>
+! add more here<br>
+<br>
+<br>
+</body>
+</html>
