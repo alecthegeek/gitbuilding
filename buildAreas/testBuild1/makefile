@@ -1,6 +1,11 @@
 o/%.o: src/%.c
-	-mkdir o
+	-mkdir o b
 	$(CC) $(CFLAGS) -I ./h -c $< -o $@
+	-rm b/$(@F).bfl
+	for i in $^ ; do \
+		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+	done
+	git add b/$(@F).bfl
 
 d/%.d: src/%.c
 	-mkdir d
@@ -18,7 +23,12 @@ clean:
 	rm -rf bin o
 
 bin/main: $(OBJS)
-	-mkdir bin
+	-mkdir bin  b
 	$(CC) $(CFLAGS) -o $@  $^
+	-rm b/$(@F).bfl
+	for i in $^ ; do \
+		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+	done
+	git add b/$(@F).bfl
 
 include ${patsubst o/%, d/%, ${patsubst %.o, %.d, $(OBJS)}}
