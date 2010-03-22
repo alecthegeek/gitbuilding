@@ -1,14 +1,15 @@
 o/%.o: src/%.c
 	-mkdir o b
 	$(CC) $(CFLAGS) -I ./h -c $< -o $@
-	for i in $^ ; do echo -n "$$i " ; git hash-object $$i ; done > b/$(@F).bfl
-	echo -n $(BLDCONFIG) >> b/$*.bfl
-	echo $(BLDCONFIG) | git hash-object --stdin > b/$(@F).b
+	-rm b/$(@F).bfl
+	for i in $^ ; do \
+		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+	done
+	git add b/$(@F).bfl
 
-d/%.d : src/%.c
+d/%.d: src/%.c
 	-mkdir d
-	$(CC) $(CLAGS) -I ./h -MM -MG -MT o/$*.o -MT d/$*.d -MT b/$@.bfl \
-		-MF $@ $<
+	$(CC) $(CLAGS) -I ./h -MM -MG -MT o/$*.o -MT d/$*.d -MF $@ $<
 
 SRCS :=	src/main.c \
 	src/a.c \
@@ -22,7 +23,12 @@ clean:
 	rm -rf bin o b
 
 bin/main: $(OBJS)
-	-mkdir bin
+	-mkdir bin  b
 	$(CC) $(CFLAGS) -o $@  $^
+	-rm b/$(@F).bfl
+	for i in $^ ; do \
+		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+	done
+	git add b/$(@F).bfl
 
 include ${patsubst o/%, d/%, ${patsubst %.o, %.d, $(OBJS)}}
