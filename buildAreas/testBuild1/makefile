@@ -6,6 +6,7 @@ o/%.o: src/%.c
 		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
 	git add b/$(@F).bfl
+        git add $@
 
 d/%.d: src/%.c
 	-mkdir d
@@ -30,5 +31,6 @@ bin/main: $(OBJS)
 		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
 	git add b/$(@F).bfl
+        git add $@
 
 include ${patsubst o/%, d/%, ${patsubst %.o, %.d, $(OBJS)}}
