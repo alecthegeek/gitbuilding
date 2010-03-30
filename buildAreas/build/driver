@@ -5,9 +5,10 @@ MODULE=main ; export MODULE
 
 BUILDHOST=$(hostname --fqdn) ; export BUILDHOST
 
-BUILDNO=$(printf "%.8d" $(echo $(cat Build_no ) + 1 | bc)) ; export BUILDNO
+BUILDCONFIG=$(dpkg --list | egrep 'gcc|lib-dev') ; export BUILDCONFIG
 
-echo $BUILDNO > Build_no
+
+BUILDNO=\"$(git log -1 '--pretty=format:%h %ai')\" ; export BUILDNO
 
 BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
 
