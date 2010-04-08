@@ -15,8 +15,8 @@ o/%.o: src/%.c
 d/%.d: src/%.c
 	-mkdir d
 	$(CC) $(CLAGS) -I ./h -MM -MG -MT o/$*.o -MT d/$*.d -MF $@ $<
-
 	git add $(@)
+
 SRCS :=	src/main.c \
 	src/a.c \
 	src/b.c
