@@ -1,0 +1,3 @@
+    Both agile and waterfall approaches to software delivery are a way to translate business needs into production features. Being able to trace that path is often crucial to affective delivery (and sometimes passing critical compliance regulations). Frequently the activity of software building breaks these important traceability links because of poor process and technology.
+
+    This presentation briefly examines these problems and looks at various approaches to overcoming them. An emphasis is placed on using processes and version control tool to provide a) Useful information and b) Audit trails of individual builds. A simple, illustrative, example using the Git DVCS is demonstrated.
