@@ -4,11 +4,11 @@ o/%.o: src/%.c
 	-rm b/$(@F).bfl
 	echo -n "BLD_FLAGS " > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
-	for i in $^ ; do \
-		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
-	done
 	echo -n "BLD_ENV " >> b/$(@F).bfl 
 	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
+	for i in $^ $(MAKEFILE_LIST); do \
+		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+	done
 	git add b/$(@F).bfl
 	git add $(@)
 
@@ -40,11 +40,12 @@ bin/main: $(OBJS)
 	-rm b/$(@F).bfl
 	echo -n BLD_FLAGS > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
-	for i in $^ ; do \
+	echo -n "BLD_ENV " >> b/$(@F).bfl 
+	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
+	for i in $^ $(MAKEFILE_LIST); do \
 		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
 	echo -n "BLD_ENV " >> b/$(@F).bfl 
-	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
 	git add b/$(@F).bfl
 	git add $(@)
 
