@@ -1,0 +1,43 @@
+#! /bin/sh
+
+set -xv
+
+MODULE=main ; export MODULE
+
+BUILDHOST=$(hostname --fqdn) ; export BUILDHOST
+
+BUILDCONFIG=$(dpkg-query --show | egrep 'gcc|lib-dev') ; export BUILDCONFIG
+
+BUILDNO="$(git log -1 '--pretty=format:%h %ai'|sed -e 's/ /_/g')" ; export BUILDNO
+
+#BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
+
+BUILDLOG=$BUILDNO.log ; export BUILDLOG
+
+echo About to build module $MODULE \(Build Number $BUILDNO\)
+echo Build platform is $BUILDCONFIG
+
+# Get the source code for the built`
+git co 
+
+# Set Config Management to highest level
+_CM_LEVEL=SYSTEM ; export _CM_LEVEL
+
+
+if make -f makefile -C '.'  >$BUILDLOG 2>&1  ; then
+	cat $BUILDLOG
+
+	# Save the log file
+	git add $BUILDLOG
+
+	# Commit the build outputs
+	git commit --message "System Build $BUILDPROJECT $BUILDNO" 
+	git tag $BUILDNO
+	echo Build $BUILDNO completed -- CM Changes commited
+
+else
+	cat $BUILDLOG
+	# The build failed so revert any changes
+	git reset --hard
+	echo Build $BUILDNO failed -- CM Changes not commited
+fi

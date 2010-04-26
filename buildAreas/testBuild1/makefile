@@ -1,7 +1,6 @@
 o/%.o: src/%.c
 	-mkdir o b
 	$(CC) $(CFLAGS) -I ./h -c $< -o $@
-	-rm b/$(@F).bfl
 	echo -n "BLD_FLAGS " > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
 	echo -n "BLD_ENV " >> b/$(@F).bfl 
@@ -10,12 +9,12 @@ o/%.o: src/%.c
 		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
 	git add b/$(@F).bfl
-	git add $(@)
+	git add $@
 
 d/%.d: src/%.c
 	-mkdir d
 	$(CC) $(CLAGS) -I ./h -MM -MG -MT o/$*.o -MT d/$*.d -MF $@ $<
-	git add $(@)
+	git add $@
 
 SRCS :=	src/main.c \
 	src/a.c \

@@ -1,4 +1,7 @@
+!buildAreas/testBuild1/makfile
+!buildAreas/testBuild1/driver
 *.o
 *.d
 *bin/main
 *.swp
+buildAreas/
