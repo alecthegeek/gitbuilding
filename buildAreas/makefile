@@ -33,7 +33,7 @@ CFLAGS:=-ansi
 all: bin/main
 
 clean:
-	rm -rf bin o b *.log
+	rm -rf bin o b *.log buildConfigData
 
 bin/main: $(OBJS)
 	-mkdir bin  b
