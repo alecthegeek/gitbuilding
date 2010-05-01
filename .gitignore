@@ -1,5 +1,5 @@
-!buildAreas/testBuild1/makfile
-!buildAreas/testBuild1/driver
+!buildAreas/makfile
+!buildAreas/driver
 *.o
 *.d
 *bin/main

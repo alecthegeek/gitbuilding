@@ -1,0 +1,56 @@
+#! /bin/bash
+
+set -xv
+
+MODULE=main ; export MODULE
+
+BUILDHOST=$(hostname --fqdn) ; export BUILDHOST
+
+cat /etc/lsb-release > buildConfigData
+dpkg-query --show | egrep 'gcc|lib-dev' >> buildConfigData
+
+
+
+BUILDCONFIG=$(git hash-object --stdin  --type blob buildConfigData); export BUILDCONFIG
+
+BUILDNO="$(git log -1 '--pretty=format:%h %ai'|sed -e 's/[ :]/_/g')" ; export BUILDNO
+
+#BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
+
+BUILDLOG=$BUILDNO.log ; export BUILDLOG
+(
+echo About to build module $MODULE \(Build Number $BUILDNO\)
+echo Build platform is $BUILDCONFIG
+cat buildConfigData
+echo Build host is $BUILDHOST
+date
+
+# Get the source code for the built`
+git co 
+
+# Set Config Management to highest level
+[[ -z $_CM_LEVEL ]] && _CM_LEVEL=SYSTEM ; export _CM_LEVEL
+
+
+if make -f makefile -C '.' 2>&1  ; then
+	# Save the log file
+	git add $BUILDLOG
+	git add buildConfigData
+
+	if [[ $_CM_LEVEL == SYSTEM ]] ; then
+		# Commit the build outputs
+		git commit --message "System Build $BUILDPROJECT $BUILDNO" 
+		git tag -a $BUILDNO  -m "System Build"
+		echo Build $BUILDNO completed -- CM Changes commited
+	else
+		echo Build $BUILDNO completed -- CM Changes NOT commited
+		git reset --mixed
+	fi
+
+else
+	cat $BUILDLOG
+	# The build failed so revert any changes
+	git reset --hard
+	echo Build $BUILDNO failed -- CM Changes not commited
+fi
+) > $BUILDLOG
