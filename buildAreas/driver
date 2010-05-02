@@ -25,11 +25,11 @@ cat buildConfigData
 echo Build host is $BUILDHOST
 date
 
-# Get the source code for the built`
+# Get the source code for the built
 git co 
 
 # Set Config Management to highest level
-[[ -z $_CM_LEVEL ]] && _CM_LEVEL=SYSTEM ; export _CM_LEVEL
+[[ -z $_CM_LEVEL ]] && _CM_LEVEL=NONE ; export _CM_LEVEL
 
 
 if make -f makefile -C '.' 2>&1  ; then

@@ -1,12 +1,12 @@
 o/%.o: src/%.c
 	-mkdir o b
 	$(CC) $(CFLAGS) -I ./h -c $< -o $@
-	echo -n "BLD_FLAGS [$(CC) $(CFLAGS)] " > b/$(@F).bfl 
+	echo -n "BLD_FLAGS [$(CC) $(CFLAGS)]:" > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
-	echo -n "BLD_ENV " >> b/$(@F).bfl 
+	echo -n "BLD_ENV:" >> b/$(@F).bfl 
 	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
 	for i in $^ $(MAKEFILE_LIST); do \
-		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+		echo -n "$$i:" >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
 	git add b/$(@F).bfl
 	git add $@
@@ -39,14 +39,13 @@ bin/main: $(OBJS)
 	-mkdir bin  b
 	$(CC) $(CFLAGS) -o $@  $^
 	-rm b/$(@F).bfl
-	echo -n "BLD_FLAGS [$(CC) $(CFLAGS)] " > b/$(@F).bfl 
+	echo -n "BLD_FLAGS [$(CC) $(CFLAGS)]:" > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
-	echo -n "BLD_ENV " >> b/$(@F).bfl 
+	echo -n "BLD_ENV:" >> b/$(@F).bfl 
 	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
 	for i in $^ $(MAKEFILE_LIST); do \
-		echo -n "$$i " >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
+		echo -n "$$i:" >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
-	echo -n "BLD_ENV " >> b/$(@F).bfl 
 	git add b/$(@F).bfl
 	git add $(@)
 
