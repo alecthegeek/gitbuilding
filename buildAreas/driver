@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# set -xv
+set -xv
 
 MODULE=main ; export MODULE
 
@@ -11,7 +11,7 @@ dpkg-query --show | egrep 'gcc|lib-dev' >> buildConfigData
 
 
 
-BUILDCONFIG=$(git hash-object --stdin  --type blob buildConfigData); export BUILDCONFIG
+BUILDCONFIG=$(git hash-object -t blob buildConfigData); export BUILDCONFIG
 
 BUILDNO="$(git log -1 '--pretty=format:%h %ai'|sed -e 's/[ :]/_/g')" ; export BUILDNO
 
@@ -53,4 +53,4 @@ else
 	git reset --hard
 	echo Build $BUILDNO failed -- CM Changes not commited
 fi
-) |tee|> $BUILDLOG
+) |tee> $BUILDLOG
