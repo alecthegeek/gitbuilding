@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -xv
+# set -xv
 
 MODULE=main ; export MODULE
 
@@ -53,4 +53,4 @@ else
 	git reset --hard
 	echo Build $BUILDNO failed -- CM Changes not commited
 fi
-) > $BUILDLOG
+) |tee|> $BUILDLOG

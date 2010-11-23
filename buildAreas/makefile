@@ -3,8 +3,7 @@ o/%.o: src/%.c
 	$(CC) $(CFLAGS) -I ./h -c $< -o $@
 	echo -n "BLD_FLAGS [$(CC) $(CFLAGS)]:" > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
-	echo -n "BLD_ENV:" >> b/$(@F).bfl 
-	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
+	echo "BLD_ENV: $(BUILDCONFIG)" >> b/$(@F).bfl 
 	for i in $^ $(MAKEFILE_LIST); do \
 		echo -n "$$i:" >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
@@ -24,6 +23,8 @@ OBJS:=${patsubst src/%, o/%, ${patsubst %.c, %.o, ${filter %.c, $(SRCS)}}}
 
 CFLAGS:=-ansi
 
+buildConfigData:=buildConfigData
+
 .PHONY: clean all
 
 .SUFFIXES:
@@ -41,8 +42,7 @@ bin/main: $(OBJS)
 	-rm b/$(@F).bfl
 	echo -n "BLD_FLAGS [$(CC) $(CFLAGS)]:" > b/$(@F).bfl 
 	echo $(CC) $(CFLAGS)  | git hash-object --stdin >> b/$(@F).bfl 
-	echo -n "BLD_ENV:" >> b/$(@F).bfl 
-	echo $(BLD_ENV)  | git hash-object --stdin >> b/$(@F).bfl 
+	echo "BLD_ENV: $(BUILDCONFIG)" >> b/$(@F).bfl 
 	for i in $^ $(MAKEFILE_LIST); do \
 		echo -n "$$i:" >> b/$(@F).bfl ; git hash-object $$i >> b/$(@F).bfl ;\
 	done
