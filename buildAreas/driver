@@ -12,7 +12,7 @@ pkgutil --group-pkgs com.apple.DevToolsNonRelocatableShared.pkg-group|sort|xargs
 
 BUILDCONFIG=$(git hash-object -t blob buildConfigData); export BUILDCONFIG
 
-BUILDNO="$(git log -1 '--pretty=format:%h %cD'|sed -e 's/[ :]/_/g')" ; export BUILDNO
+BUILDNO="$(git log -1 '--pretty=format:%ct_%h'|sed -e 's/[ :]/_/g')" ; export BUILDNO
 
 #BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
 
