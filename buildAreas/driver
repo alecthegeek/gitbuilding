@@ -7,7 +7,7 @@ MODULE=main ; export MODULE
 BUILDHOST=$(hostname -f) ; export BUILDHOST
 
 sw_vers > buildConfigData
-pkgutil --group-pkgs com.apple.DevToolsNonRelocatableShared.pkg-group|sort|xargs -n 1 pkgutil --pkg-info >> builConfigData
+pkgutil --group-pkgs com.apple.DevToolsNonRelocatableShared.pkg-group|sort|xargs -n 1 pkgutil --pkg-info >> buildConfigData
 
 
 BUILDCONFIG=$(git hash-object -t blob buildConfigData); export BUILDCONFIG

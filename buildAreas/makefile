@@ -13,7 +13,7 @@ o/%.o: src/%.c
 d/%.d: src/%.c
 	-mkdir d
 	$(CC) $(CLAGS) -I ./h -MM -MG -MT o/$*.o -MT d/$*.d -MF $@ $<
-	git add $@
+	-git add $@
 
 SRCS:=src/main.c \
 	src/a.c \
@@ -22,6 +22,8 @@ SRCS:=src/main.c \
 OBJS:=${patsubst src/%, o/%, ${patsubst %.c, %.o, ${filter %.c, $(SRCS)}}}
 
 CFLAGS:=-ansi
+
+CC:=gcc  # force use of GNU CC TODO Support Clang
 
 buildConfigData:=buildConfigData
 
@@ -32,6 +34,9 @@ buildConfigData:=buildConfigData
 .SUFFIXES: .o .d
 
 all: bin/main
+
+realclean: clean
+	rm -rf d
 
 clean:
 	rm -rf bin o b *.log buildConfigData
