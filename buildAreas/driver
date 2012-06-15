@@ -6,14 +6,13 @@ MODULE=main ; export MODULE
 
 BUILDHOST=$(hostname -f) ; export BUILDHOST
 
-sw_vers> buildConfigData
-pkgutil --group-pkgs com.apple.DevToolsNonRelocatableShared.pkg-group >> buildConfigData
-
+sw_vers > buildConfigData
+pkgutil --group-pkgs com.apple.DevToolsNonRelocatableShared.pkg-group|sort|xargs -n 1 pkgutil --pkg-info >> builConfigData
 
 
 BUILDCONFIG=$(git hash-object -t blob buildConfigData); export BUILDCONFIG
 
-BUILDNO="$(git log -1 '--pretty=format:%h %ct'|sed -e 's/[ :]/_/g')" ; export BUILDNO
+BUILDNO="$(git log -1 '--pretty=format:%h %cD'|sed -e 's/[ :]/_/g')" ; export BUILDNO
 
 #BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
 
