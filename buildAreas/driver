@@ -4,16 +4,16 @@ set -xv
 
 MODULE=main ; export MODULE
 
-BUILDHOST=$(hostname --fqdn) ; export BUILDHOST
+BUILDHOST=$(hostname -f) ; export BUILDHOST
 
-cat /etc/lsb-release > buildConfigData
-dpkg-query --show | egrep 'gcc|lib-dev' >> buildConfigData
+sw_vers> buildConfigData
+pkgutil --group-pkgs com.apple.DevToolsNonRelocatableShared.pkg-group >> buildConfigData
 
 
 
 BUILDCONFIG=$(git hash-object -t blob buildConfigData); export BUILDCONFIG
 
-BUILDNO="$(git log -1 '--pretty=format:%h %ai'|sed -e 's/[ :]/_/g')" ; export BUILDNO
+BUILDNO="$(git log -1 '--pretty=format:%h %ct'|sed -e 's/[ :]/_/g')" ; export BUILDNO
 
 #BUILDPROJECT=BuildProject1 ; export BUILDPROJECT
 
@@ -48,7 +48,6 @@ if make -f makefile -C '.' 2>&1  ; then
 	fi
 
 else
-	cat $BUILDLOG
 	# The build failed so revert any changes
 	git reset --hard
 	echo Build $BUILDNO failed -- CM Changes not commited
